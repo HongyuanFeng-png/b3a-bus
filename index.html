@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en-HK">
+<html lang="zh-HK">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>B3A · Fu Tai Estate ⇄ Shenzhen Bay Port</title>
-<meta name="description" content="Live B3A schedules from Fu Tai Estate to Shenzhen Bay Port and the return trip, powered by Citybus open data.">
+<title>B3A 巴士 · 富泰邨 ⇄ 深圳灣口岸</title>
+<meta name="description" content="B3A 實時班次：富泰邨來往深圳灣口岸，資料來自城巴開放數據。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffd21f'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='%23081018'%3EB3A%3C/text%3E%3C/svg%3E">
 <style>
   :root {
@@ -323,6 +323,59 @@
     font-weight: 600;
   }
 
+  .last-bus {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 7px 10px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .025);
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.35;
+    transition: color .25s, border-color .25s, background .25s;
+  }
+
+  .last-bus-tag {
+    flex: none;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .1);
+    color: #dfe9f2;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .08em;
+  }
+
+  .last-bus-text {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .03em;
+  }
+
+  .last-bus.is-warning {
+    border-color: rgba(255, 191, 90, .3);
+    background: rgba(255, 191, 90, .07);
+    color: #ffe0b0;
+  }
+
+  .last-bus.is-warning .last-bus-tag {
+    background: var(--amber);
+    color: #1a1205;
+  }
+
+  .last-bus.is-departed {
+    border-color: rgba(255, 115, 115, .3);
+    background: rgba(255, 115, 115, .07);
+    color: #ffc9c9;
+  }
+
+  .last-bus.is-departed .last-bus-tag {
+    background: var(--red);
+    color: #2a0808;
+  }
+
   .next {
     display: flex;
     align-items: flex-end;
@@ -339,21 +392,21 @@
 
   .number {
     color: var(--yellow);
-    font: 700 clamp(62px, 8.8vw, 86px)/.86 var(--digits);
+    font: 700 clamp(88px, 12vw, 124px)/.8 var(--digits);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -.045em;
-    text-shadow: 0 0 38px rgba(255, 210, 31, .2);
+    letter-spacing: -.055em;
+    text-shadow: 0 0 46px rgba(255, 210, 31, .24);
   }
 
   .number.due {
-    font-size: clamp(40px, 5.6vw, 54px);
+    font-size: clamp(52px, 7vw, 68px);
     letter-spacing: -.02em;
   }
 
   .unit {
-    padding-bottom: 4px;
+    padding-bottom: 6px;
     color: #cbb75b;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: .16em;
     text-transform: uppercase;
@@ -411,7 +464,7 @@
 
   .follow time {
     color: #dfe9f2;
-    font: 500 14px/1 var(--digits);
+    font: 500 15px/1 var(--digits);
     font-variant-numeric: tabular-nums;
     letter-spacing: .02em;
   }
@@ -425,14 +478,14 @@
 
   .follow .mins .num {
     color: var(--text);
-    font: 600 16px/1 var(--digits);
+    font: 600 18px/1 var(--digits);
     font-variant-numeric: tabular-nums;
     margin-right: 2px;
   }
 
   .follow .mins .unit {
     padding: 0;
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: .1em;
   }
 
@@ -570,7 +623,7 @@
       border-left: 0;
       border-top: 1px solid var(--line);
     }
-    .number { font-size: clamp(64px, 16vw, 84px); }
+    .number { font-size: clamp(96px, 20vw, 124px); }
     .follow { padding: 12px 0; }
   }
 
@@ -584,9 +637,10 @@
     .dir { padding: 20px; }
     .dir-to { margin-top: 11px; }
     .dir-from { margin-top: 8px; }
+    .last-bus { font-size: 9px; }
     .next { margin-top: 14px; }
-    .number { font-size: 70px; }
-    .number.due { font-size: 40px; }
+    .number { font-size: 104px; }
+    .number.due { font-size: 54px; }
     .next-side .time { font-size: 21px; }
     .following { margin-top: 13px; }
     .follow { padding: 10px 0; }
@@ -596,8 +650,8 @@
   @media (max-width: 380px) {
     .op-sub { display: none; }
     .dir { padding: 20px; }
-    .number { font-size: 68px; }
-    .number.due { font-size: 38px; }
+    .number { font-size: 92px; }
+    .number.due { font-size: 48px; }
     .countdown { gap: 7px; }
     .next-side .time { font-size: 19px; }
     .dir-to { font-size: 17px; }
@@ -627,26 +681,30 @@
   </header>
 
   <section class="hero">
-    <p class="kicker">Live schedule · 實時班次</p>
+    <p class="kicker">實時班次 · Live schedule</p>
     <h1>
-      Fu Tai Estate
+      富泰邨
       <span class="arrow" aria-hidden="true">⇄</span>
-      <span class="to">Shenzhen Bay Port</span>
+      <span class="to">深圳灣口岸</span>
     </h1>
-    <p class="zh">富泰邨 · 青山公路 <span class="zh-arrow">⇄</span> 深圳灣口岸</p>
+    <p class="zh">Fu Tai Estate · Castle Peak Road <span class="zh-arrow">⇄</span> Shenzhen Bay Port</p>
   </section>
 
-  <section class="board" id="board" aria-label="B3A live schedules: Fu Tai Estate to Shenzhen Bay Port, and Shenzhen Bay Port to Shan King Estate">
+  <section class="board" id="board" aria-label="B3A 實時班次：富泰邨往深圳灣口岸，以及深圳灣口岸往山景邨">
     <article class="dir" id="outPanel" data-dir="out">
       <div class="dir-head">
         <span class="dir-tag">出發 · Outbound</span>
         <span class="dir-arrow" aria-hidden="true">→</span>
       </div>
       <h2 class="dir-to">
-        Shenzhen Bay Port
-        <span class="dir-zh">深圳灣口岸</span>
+        深圳灣口岸
+        <span class="dir-zh">Shenzhen Bay Port</span>
       </h2>
-      <p class="dir-from">From <b>Fu Tai Estate</b> · 富泰邨</p>
+      <p class="dir-from">由 <b>富泰邨</b> 開出 · From Fu Tai Estate</p>
+      <div class="last-bus" data-last-bus>
+        <span class="last-bus-tag">尾班車</span>
+        <span class="last-bus-text" data-last-text>約 22:50</span>
+      </div>
 
       <div class="next" data-ts="">
         <div class="countdown">
@@ -673,10 +731,14 @@
         <span class="dir-arrow" aria-hidden="true">←</span>
       </div>
       <h2 class="dir-to">
-        Shan King Estate
-        <span class="dir-zh">屯門 · 山景邨</span>
+        山景邨
+        <span class="dir-zh">Shan King Estate · 屯門</span>
       </h2>
-      <p class="dir-from">From <b>Shenzhen Bay Port</b> · 深圳灣口岸</p>
+      <p class="dir-from">由 <b>深圳灣口岸</b> 開出 · From Shenzhen Bay Port</p>
+      <div class="last-bus" data-last-bus>
+        <span class="last-bus-tag">尾班車</span>
+        <span class="last-bus-text" data-last-text>23:35</span>
+      </div>
 
       <div class="next" data-ts="">
         <div class="countdown">
@@ -746,6 +808,15 @@
   const REQUEST_TIMEOUT_MS = 12000;
   const MAX_BOARDS = 3;
 
+  // Citybus B3A timetable: last departure from Shan King is 22:20
+  // (about 22:50 at Fu Tai), and from Shenzhen Bay Port is 23:35.
+  // The warning appears during the 60 minutes before that time.
+  const LAST_BUS = {
+    out: { hour: 22, minute: 50, normal: "約 22:50", warn: "尾班車約 22:50 · 請預留時間" },
+    ret: { hour: 23, minute: 35, normal: "23:35", warn: "尾班車 23:35 · 請預留時間" }
+  };
+  const LAST_BUS_WARN_MS = 60 * 60 * 1000;
+
   const el = {
     live: document.getElementById("live"),
     liveText: document.getElementById("liveText"),
@@ -773,6 +844,23 @@
   const clockFmt = new Intl.DateTimeFormat("en-GB", {
     timeZone: TZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
   });
+  const dateFmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit"
+  });
+
+  function hktDateKey() {
+    const values = {};
+    dateFmt.formatToParts(new Date()).forEach(part => {
+      if (part.type !== "literal") values[part.type] = part.value;
+    });
+    return values.year + "-" + values.month + "-" + values.day;
+  }
+
+  function lastBusTimestamp(config) {
+    const hh = String(config.hour).padStart(2, "0");
+    const mm = String(config.minute).padStart(2, "0");
+    return Date.parse(hktDateKey() + "T" + hh + ":" + mm + ":00+08:00");
+  }
 
   function formatTime(ts) {
     return timeFmt.format(new Date(ts));
@@ -889,6 +977,32 @@
     updateCountdowns();
   }
 
+  function renderLastBus(key) {
+    const panel = BOARDS[key].panel;
+    const node = panel.querySelector("[data-last-bus]");
+    const text = panel.querySelector("[data-last-text]");
+    if (!node || !text) return;
+
+    const config = LAST_BUS[key];
+    const lastTs = lastBusTimestamp(config);
+    const now = Date.now();
+
+    let label = config.normal;
+    let state = "normal";
+
+    if (now >= lastTs - LAST_BUS_WARN_MS && now <= lastTs) {
+      label = config.warn;
+      state = "warning";
+    } else if (now > lastTs) {
+      label = "尾班車時間已過";
+      state = "departed";
+    }
+
+    text.textContent = label;
+    node.classList.toggle("is-warning", state === "warning");
+    node.classList.toggle("is-departed", state === "departed");
+  }
+
   function renderDirection(key) {
     const config = BOARDS[key];
     const panel = config.panel;
@@ -896,8 +1010,12 @@
     const followingEl = panel.querySelector("[data-following]");
     const emptyEl = panel.querySelector("[data-empty]");
 
+    renderLastBus(key);
+
     const now = Date.now();
-    const upcoming = schedules[key].filter(bus => bus.ts > now - 30000);
+    const upcoming = schedules[key]
+      .filter(bus => bus.ts > now - 30000)
+      .sort((a, b) => a.ts - b.ts);
 
     if (!upcoming.length) {
       nextEl.hidden = true;

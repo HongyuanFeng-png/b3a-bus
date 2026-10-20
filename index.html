@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>B3A · Fu Tai Estate ⇄ Shenzhen Bay Port</title>
+<meta name="description" content="Live B3A schedules from Fu Tai Estate to Shenzhen Bay Port and the return trip, powered by Citybus open data.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffd21f'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='%23081018'%3EB3A%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #050d14;
+    --text: #eef4f8;
+    --muted: #8ba2b4;
+    --yellow: #ffd21f;
+    --cyan: #72d7ff;
+    --green: #3ee0a0;
+    --amber: #ffbf5a;
+    --red: #ff7373;
+    --line: rgba(255, 255, 255, .085);
+    --sans: "Avenir Next", Avenir, "Helvetica Neue", "PingFang HK", "Hiragino Sans HK", "Microsoft JhengHei", sans-serif;
+    --digits: "DIN Alternate", Bahnschrift, "SF Pro Display", "Helvetica Neue", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: clamp(18px, 4vw, 48px);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(1000px 620px at 82% -16%, rgba(255, 210, 31, .13), transparent 62%),
+      radial-gradient(900px 700px at -12% 110%, rgba(24, 104, 150, .22), transparent 60%),
+      var(--bg);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .022) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 38%, #000 18%, transparent 78%);
+    mask-image: radial-gradient(ellipse at 50% 38%, #000 18%, transparent 78%);
+  }
+
+  .shell {
+    position: relative;
+    width: min(100%, 900px);
+  }
+
+  /* Masthead */
+  .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: clamp(34px, 6vh, 54px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .badge {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 84px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--yellow);
+    color: #081018;
+    font: 800 27px/1 var(--digits);
+    letter-spacing: .02em;
+    box-shadow: 0 10px 34px rgba(255, 210, 31, .18);
+  }
+
+  .op-name {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .3em;
+  }
+
+  .op-sub {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .14em;
+  }
+
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    padding: 9px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .03);
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    transition: color .25s, border-color .25s, background .25s;
+  }
+
+  .live i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    transition: background .25s;
+  }
+
+  .live[data-state="on"] {
+    border-color: rgba(62, 224, 160, .22);
+    background: rgba(62, 224, 160, .06);
+    color: #c8f7e4;
+  }
+
+  .live[data-state="on"] i {
+    background: var(--green);
+    animation: pulse 2.4s ease-out infinite;
+  }
+
+  .live[data-state="warn"] {
+    border-color: rgba(255, 191, 90, .26);
+    background: rgba(255, 191, 90, .06);
+    color: #ffe0b0;
+  }
+
+  .live[data-state="warn"] i { background: var(--amber); }
+
+  .live[data-state="err"] {
+    border-color: rgba(255, 115, 115, .26);
+    background: rgba(255, 115, 115, .06);
+    color: #ffc9c9;
+  }
+
+  .live[data-state="err"] i { background: var(--red); }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(62, 224, 160, .45); }
+    70%  { box-shadow: 0 0 0 7px rgba(62, 224, 160, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(62, 224, 160, 0); }
+  }
+
+  /* Route heading */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin: 0 0 13px;
+    color: var(--yellow);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+  }
+
+  .kicker::before {
+    content: "";
+    width: 26px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--yellow);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(27px, 4.1vw, 40px);
+    font-weight: 700;
+    line-height: 1.14;
+    letter-spacing: -.022em;
+    text-wrap: balance;
+  }
+
+  h1 .arrow {
+    margin: 0 .14em;
+    color: var(--yellow);
+    font-weight: 400;
+  }
+
+  h1 .to { color: var(--yellow); }
+
+  .zh {
+    margin: 11px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: .06em;
+  }
+
+  .zh .zh-arrow {
+    margin: 0 .35em;
+    opacity: .55;
+  }
+
+  /* Schedule board */
+  .board {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: clamp(26px, 4.5vh, 38px);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(16, 34, 48, .94), rgba(9, 22, 33, .97));
+    box-shadow:
+      0 34px 90px rgba(0, 0, 0, .38),
+      inset 0 1px 0 rgba(255, 255, 255, .04);
+  }
+
+  .board::before {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--yellow), rgba(255, 210, 31, .08) 45%, rgba(114, 215, 255, .08) 55%, var(--cyan));
+  }
+
+  .board::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .016) 0 1px, transparent 1px 4px);
+    opacity: .5;
+  }
+
+  .dir {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    padding: clamp(22px, 3.1vw, 30px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dir + .dir { border-left: 1px solid var(--line); }
+
+  .dir-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .dir-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--yellow);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .dir-tag::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .dir-tag.ret { color: var(--cyan); }
+
+  .dir-arrow {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: .1em;
+    white-space: nowrap;
+  }
+
+  .dir-to {
+    margin: 15px 0 0;
+    font-size: clamp(18px, 2.2vw, 21px);
+    font-weight: 700;
+    line-height: 1.18;
+    letter-spacing: -.012em;
+  }
+
+  .dir-to .dir-zh {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .1em;
+  }
+
+  .dir-from {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .04em;
+  }
+
+  .dir-from b {
+    color: #c8d6e2;
+    font-weight: 600;
+  }
+
+  .next {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 19px;
+  }
+
+  .countdown {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+  }
+
+  .number {
+    color: var(--yellow);
+    font: 700 clamp(62px, 8.8vw, 86px)/.86 var(--digits);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.045em;
+    text-shadow: 0 0 38px rgba(255, 210, 31, .2);
+  }
+
+  .number.due {
+    font-size: clamp(40px, 5.6vw, 54px);
+    letter-spacing: -.02em;
+  }
+
+  .unit {
+    padding-bottom: 4px;
+    color: #cbb75b;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .next-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    padding-bottom: 4px;
+    text-align: right;
+  }
+
+  .next-side .time {
+    font: 600 clamp(19px, 2.4vw, 25px)/1.1 var(--digits);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .015em;
+  }
+
+  .remark {
+    margin-top: 4px;
+    color: #d8c46d;
+    font-size: 9px;
+    letter-spacing: .03em;
+  }
+
+  .following {
+    margin-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .follow {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 8px;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .05);
+  }
+
+  .follow:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .follow .tag {
+    display: block;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .follow time {
+    color: #dfe9f2;
+    font: 500 14px/1 var(--digits);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
+  }
+
+  .follow .mins {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+
+  .follow .mins .num {
+    color: var(--text);
+    font: 600 16px/1 var(--digits);
+    font-variant-numeric: tabular-nums;
+    margin-right: 2px;
+  }
+
+  .follow .mins .unit {
+    padding: 0;
+    font-size: 8px;
+    letter-spacing: .1em;
+  }
+
+  .follow.is-due .mins .num {
+    color: var(--yellow);
+  }
+
+  .dir-empty {
+    margin-top: 18px;
+    padding: 20px 0 2px;
+    color: var(--muted);
+  }
+
+  .dir-empty strong {
+    display: block;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .dir-empty span {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+  }
+
+  .dir.is-error .dir-tag { color: var(--amber); }
+
+  /* Error notice */
+  .notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-top: 14px;
+    padding: 11px 14px;
+    border: 1px solid rgba(255, 180, 80, .24);
+    border-radius: 12px;
+    background: rgba(255, 160, 50, .06);
+    color: #ffd19a;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .notice::before {
+    content: "!";
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  /* Footer */
+  .foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 22px;
+    flex-wrap: wrap;
+    margin-top: 19px;
+    padding: 0 4px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .05em;
+  }
+
+  .foot a {
+    color: #c4d2dd;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(196, 210, 221, .25);
+    padding-bottom: 1px;
+  }
+
+  .foot a:hover { color: var(--text); border-color: var(--yellow); }
+
+  .foot .meta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sep {
+    width: 3px;
+    height: 3px;
+    flex: none;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .35;
+  }
+
+  .refresh { color: #cfdae3; }
+  .refresh strong { color: var(--yellow); font-weight: 700; }
+
+  /* 30-second refresh bar */
+  .timer {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, .055);
+  }
+
+  .timer i {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 210, 31, .18), var(--yellow));
+    transform-origin: left center;
+    transform: scaleX(1);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 760px) {
+    .board { grid-template-columns: 1fr; }
+    .dir + .dir {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+    .number { font-size: clamp(64px, 16vw, 84px); }
+    .follow { padding: 12px 0; }
+  }
+
+  @media (max-width: 520px) {
+    .masthead { margin-bottom: 28px; }
+    .badge { width: 72px; height: 50px; border-radius: 14px; font-size: 24px; }
+    .op-name { font-size: 10px; letter-spacing: .24em; }
+    .op-sub { font-size: 9px; }
+    .live { padding: 8px 11px; font-size: 8px; letter-spacing: .16em; }
+    .board { margin-top: 22px; }
+    .dir { padding: 20px; }
+    .dir-to { margin-top: 11px; }
+    .dir-from { margin-top: 8px; }
+    .next { margin-top: 14px; }
+    .number { font-size: 70px; }
+    .number.due { font-size: 40px; }
+    .next-side .time { font-size: 21px; }
+    .following { margin-top: 13px; }
+    .follow { padding: 10px 0; }
+    .foot { margin-top: 14px; font-size: 9px; }
+  }
+
+  @media (max-width: 380px) {
+    .op-sub { display: none; }
+    .dir { padding: 20px; }
+    .number { font-size: 68px; }
+    .number.due { font-size: 38px; }
+    .countdown { gap: 7px; }
+    .next-side .time { font-size: 19px; }
+    .dir-to { font-size: 17px; }
+    .follow { grid-template-columns: 38px minmax(0, 1fr) auto; }
+    .foot { gap: 8px 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live[data-state="on"] i { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="masthead">
+    <div class="brand">
+      <span class="badge" aria-hidden="true">B3A</span>
+      <div>
+        <span class="op-name">CITYBUS</span>
+        <span class="op-sub">城巴 · Real-time arrivals</span>
+      </div>
+    </div>
+    <div class="live" id="live" data-state="wait">
+      <i aria-hidden="true"></i>
+      <span id="liveText">Connecting</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <p class="kicker">Live schedule · 實時班次</p>
+    <h1>
+      Fu Tai Estate
+      <span class="arrow" aria-hidden="true">⇄</span>
+      <span class="to">Shenzhen Bay Port</span>
+    </h1>
+    <p class="zh">富泰邨 · 青山公路 <span class="zh-arrow">⇄</span> 深圳灣口岸</p>
+  </section>
+
+  <section class="board" id="board" aria-label="B3A live schedules: Fu Tai Estate to Shenzhen Bay Port, and Shenzhen Bay Port to Shan King Estate">
+    <article class="dir" id="outPanel" data-dir="out">
+      <div class="dir-head">
+        <span class="dir-tag">出發 · Outbound</span>
+        <span class="dir-arrow" aria-hidden="true">→</span>
+      </div>
+      <h2 class="dir-to">
+        Shenzhen Bay Port
+        <span class="dir-zh">深圳灣口岸</span>
+      </h2>
+      <p class="dir-from">From <b>Fu Tai Estate</b> · 富泰邨</p>
+
+      <div class="next" data-ts="">
+        <div class="countdown">
+          <span class="number" data-num>—</span>
+          <span class="unit" data-unit>min</span>
+        </div>
+        <div class="next-side">
+          <span class="tag">Scheduled</span>
+          <time class="time" data-time>--:--</time>
+          <span class="remark" data-note hidden></span>
+        </div>
+      </div>
+
+      <div class="following" data-following hidden></div>
+      <div class="dir-empty" data-empty hidden>
+        <strong>No departures right now</strong>
+        <span>Checking again every 30 seconds</span>
+      </div>
+    </article>
+
+    <article class="dir" id="retPanel" data-dir="ret">
+      <div class="dir-head">
+        <span class="dir-tag ret">返程 · Return</span>
+        <span class="dir-arrow" aria-hidden="true">←</span>
+      </div>
+      <h2 class="dir-to">
+        Shan King Estate
+        <span class="dir-zh">屯門 · 山景邨</span>
+      </h2>
+      <p class="dir-from">From <b>Shenzhen Bay Port</b> · 深圳灣口岸</p>
+
+      <div class="next" data-ts="">
+        <div class="countdown">
+          <span class="number" data-num>—</span>
+          <span class="unit" data-unit>min</span>
+        </div>
+        <div class="next-side">
+          <span class="tag">Scheduled</span>
+          <time class="time" data-time>--:--</time>
+          <span class="remark" data-note hidden></span>
+        </div>
+      </div>
+
+      <div class="following" data-following hidden></div>
+      <div class="dir-empty" data-empty hidden>
+        <strong>No departures right now</strong>
+        <span>Checking again every 30 seconds</span>
+      </div>
+    </article>
+
+    <div class="timer" aria-hidden="true"><i id="timerBar"></i></div>
+  </section>
+
+  <div class="notice" id="notice" role="status" hidden>
+    <span id="noticeText"></span>
+  </div>
+
+  <footer class="foot">
+    <div class="source">
+      Citybus open data · <a href="https://data.gov.hk" target="_blank" rel="noopener">DATA.GOV.HK</a>
+    </div>
+    <div class="meta">
+      <span><span id="clock">--:--:--</span> HKT</span>
+      <span class="sep" aria-hidden="true"></span>
+      <span id="updated">Updated —</span>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="refresh">next in <strong><span id="countdown">30</span>s</strong></span>
+    </div>
+  </footer>
+
+  <div class="sr-only" id="announcer" aria-live="polite"></div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // Stop IDs come from /route-stop/CTB/B3A/outbound and /route-stop/CTB/B3A/inbound:
+  // 003261 = Fu Tai Estate, Castle Peak Road (outbound seq 14)
+  // 003208 = Shenzhen Bay Port (outbound seq 15 / inbound seq 1)
+  const BOARDS = {
+    out: {
+      api: "https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/003261/B3A",
+      dir: "O",
+      label: "departure",
+      panel: document.getElementById("outPanel")
+    },
+    ret: {
+      api: "https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/003208/B3A",
+      dir: "I",
+      label: "return",
+      panel: document.getElementById("retPanel")
+    }
+  };
+
+  const REFRESH_MS = 30000;
+  const REQUEST_TIMEOUT_MS = 12000;
+  const MAX_BOARDS = 3;
+
+  const el = {
+    live: document.getElementById("live"),
+    liveText: document.getElementById("liveText"),
+    clock: document.getElementById("clock"),
+    updated: document.getElementById("updated"),
+    countdown: document.getElementById("countdown"),
+    timerBar: document.getElementById("timerBar"),
+    notice: document.getElementById("notice"),
+    noticeText: document.getElementById("noticeText"),
+    announcer: document.getElementById("announcer")
+  };
+
+  const schedules = { out: [], ret: [] };
+  const boardError = { out: false, ret: false };
+
+  let nextRefreshAt = Date.now() + REFRESH_MS;
+  let lastUpdated = null;
+  let loading = false;
+  let loadedOnce = false;
+
+  const TZ = "Asia/Hong_Kong";
+  const timeFmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  });
+  const clockFmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+  });
+
+  function formatTime(ts) {
+    return timeFmt.format(new Date(ts));
+  }
+
+  function setStatus(state, text) {
+    el.live.dataset.state = state;
+    el.liveText.textContent = text;
+  }
+
+  function showNotice(message) {
+    el.noticeText.textContent = message;
+    el.notice.hidden = false;
+  }
+
+  function hideNotice() {
+    el.notice.hidden = true;
+  }
+
+  function announce(message) {
+    el.announcer.textContent = "";
+    window.setTimeout(() => { el.announcer.textContent = message; }, 30);
+  }
+
+  async function fetchSchedule(config) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(config.api + "?t=" + Date.now(), {
+        cache: "no-store",
+        signal: controller.signal
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+
+      const payload = await res.json();
+      if (!payload || !Array.isArray(payload.data)) throw new Error("Unexpected response");
+
+      const now = Date.now();
+      const seen = new Set();
+
+      return payload.data
+        .filter(bus => bus.dir === config.dir && bus.eta)
+        .map(bus => ({
+          ts: Date.parse(bus.eta),
+          remark: (bus.rmk_en || "").trim()
+        }))
+        .filter(bus => Number.isFinite(bus.ts) && bus.ts > now - 45000)
+        .sort((a, b) => a.ts - b.ts)
+        .filter(bus => {
+          if (seen.has(bus.ts)) return false;
+          seen.add(bus.ts);
+          return true;
+        })
+        .slice(0, MAX_BOARDS);
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  }
+
+  async function load() {
+    if (loading) return;
+    loading = true;
+
+    if (!loadedOnce) setStatus("wait", "Connecting");
+
+    const keys = Object.keys(BOARDS);
+    const results = await Promise.allSettled(keys.map(key => fetchSchedule(BOARDS[key])));
+
+    let successCount = 0;
+    const failed = [];
+
+    results.forEach((result, index) => {
+      const key = keys[index];
+      if (result.status === "fulfilled") {
+        schedules[key] = result.value;
+        boardError[key] = false;
+        successCount++;
+      } else {
+        boardError[key] = true;
+        failed.push(BOARDS[key].label);
+      }
+    });
+
+    loadedOnce = true;
+
+    if (successCount > 0) lastUpdated = Date.now();
+
+    if (successCount === keys.length) {
+      setStatus("on", "Live");
+      hideNotice();
+    } else if (successCount > 0) {
+      setStatus("warn", "Partial");
+      showNotice("The " + failed.join(" and ") + " schedule couldn't refresh — showing the last update.");
+    } else {
+      setStatus("err", "Retrying");
+      showNotice("Live data interrupted — showing the last update. Retrying every 30 seconds.");
+    }
+
+    render();
+    announce(successCount === keys.length
+      ? "B3A departure and return schedules updated."
+      : "Some B3A schedules could not be refreshed.");
+
+    loading = false;
+    nextRefreshAt = Date.now() + REFRESH_MS;
+    updateClockAndTimer();
+  }
+
+  function render() {
+    if (!loadedOnce) return;
+    renderDirection("out");
+    renderDirection("ret");
+    updateCountdowns();
+  }
+
+  function renderDirection(key) {
+    const config = BOARDS[key];
+    const panel = config.panel;
+    const nextEl = panel.querySelector(".next");
+    const followingEl = panel.querySelector("[data-following]");
+    const emptyEl = panel.querySelector("[data-empty]");
+
+    const now = Date.now();
+    const upcoming = schedules[key].filter(bus => bus.ts > now - 30000);
+
+    if (!upcoming.length) {
+      nextEl.hidden = true;
+      followingEl.hidden = true;
+      followingEl.replaceChildren();
+      emptyEl.hidden = false;
+
+      const title = emptyEl.querySelector("strong");
+      const note = emptyEl.querySelector("span");
+
+      if (boardError[key]) {
+        title.textContent = "Live data unavailable";
+        note.textContent = "Retrying automatically every 30 seconds";
+      } else {
+        title.textContent = "No departures right now";
+        note.textContent = "Checking again every 30 seconds";
+      }
+
+      panel.classList.toggle("is-error", boardError[key]);
+      return;
+    }
+
+    panel.classList.remove("is-error");
+    nextEl.hidden = false;
+    emptyEl.hidden = true;
+
+    const [first, ...rest] = upcoming;
+
+    nextEl.dataset.ts = String(first.ts);
+    nextEl.querySelector("[data-time]").textContent = formatTime(first.ts);
+
+    const noteEl = nextEl.querySelector("[data-note]");
+    noteEl.hidden = !first.remark;
+    noteEl.textContent = first.remark;
+
+    followingEl.innerHTML = rest.map((bus, index) => (
+      '<div class="follow" data-ts="' + bus.ts + '">' +
+        '<span class="tag">' + (index === 0 ? "Then" : "Later") + '</span>' +
+        '<time>' + formatTime(bus.ts) + '</time>' +
+        '<span class="mins"><span class="num">—</span><span class="unit">min</span></span>' +
+      '</div>'
+    )).join("");
+    followingEl.hidden = rest.length === 0;
+  }
+
+  function updateCountdowns() {
+    document.querySelectorAll("[data-ts]").forEach(node => {
+      const ts = Number(node.dataset.ts);
+      if (!Number.isFinite(ts)) return;
+
+      const num = node.querySelector("[data-num], .num");
+      const unit = node.querySelector("[data-unit], .unit");
+      if (!num || !unit) return;
+
+      const diff = ts - Date.now();
+
+      if (diff <= 0) {
+        num.textContent = "Due";
+        num.classList.add("due");
+        unit.hidden = true;
+        node.classList.add("is-due");
+      } else {
+        num.textContent = String(Math.max(1, Math.round(diff / 60000)));
+        num.classList.remove("due");
+        unit.hidden = false;
+        node.classList.remove("is-due");
+      }
+    });
+  }
+
+  function updateClockAndTimer() {
+    const now = Date.now();
+    el.clock.textContent = clockFmt.format(new Date(now));
+    el.updated.textContent = lastUpdated ? "Updated " + clockFmt.format(new Date(lastUpdated)) : "Updated —";
+
+    const remaining = Math.max(0, nextRefreshAt - now);
+    el.countdown.textContent = String(Math.ceil(remaining / 1000));
+    el.timerBar.style.transform = "scaleX(" + Math.min(1, remaining / REFRESH_MS) + ")";
+  }
+
+  function tick() {
+    updateClockAndTimer();
+    updateCountdowns();
+
+    if (!loading && Date.now() >= nextRefreshAt) load();
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      tick();
+      if (Date.now() >= nextRefreshAt) load();
+    }
+  });
+
+  updateClockAndTimer();
+  load();
+  window.setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>
